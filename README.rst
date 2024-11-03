@@ -6,6 +6,16 @@ A fork of QEMU implementing the Broadcom SP804 ARM timer (Used in BCM2835 based 
 
 This fork is based on https://github.com/qemu/qemu/pull/78 (Published on 8th Feb 2019) various modification were required as the original code would no longer compile with the newest version of QEMU.
 
+Use the following commands to build:
+
+.. code-block:: bash
+
+    ./configure --target-list=arm-softmmu
+    cd build
+    make -j8
+
+This ensures that only the ARM QEMU binary is built.
+
 ===========
 QEMU README
 ===========
