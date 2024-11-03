@@ -36,6 +36,7 @@
 #include "hw/nvram/bcm2835_otp.h"
 #include "hw/misc/unimp.h"
 #include "qom/object.h"
+#include "hw/timer/bcm283x_timer.h"
 
 #define TYPE_BCM_SOC_PERIPHERALS_BASE "bcm-soc-peripherals-base"
 OBJECT_DECLARE_TYPE(BCMSocPeripheralBaseState, BCMSocPeripheralBaseClass,
@@ -55,7 +56,7 @@ struct BCMSocPeripheralBaseState {
     BCM2835SystemTimerState systmr;
     BCM2835MphiState mphi;
     UnimplementedDeviceState txp;
-    UnimplementedDeviceState armtmr;
+    BCM283xSP804State armtmr;
     BCM2835PowerMgtState powermgt;
     BCM2835CprmanState cprman;
     PL011State uart0;

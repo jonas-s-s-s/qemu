@@ -1,4 +1,12 @@
 ===========
+BCM2853 ARM Timer QEMU extension
+===========
+
+A fork of QEMU implementing the Broadcom SP804 ARM timer (Used in BCM2835 based Raspberry Pis).
+
+This fork is based on https://github.com/qemu/qemu/pull/78 (Published on 8th Feb 2019) various modification were required as the original code would no longer compile with the newest version of QEMU.
+
+===========
 QEMU README
 ===========
 

@@ -69,6 +69,7 @@ static void bcm2835_peripherals_init(Object *obj)
                             &s_base->orgated_dma_irq, TYPE_OR_IRQ);
     object_property_set_int(OBJECT(&s_base->orgated_dma_irq), "num-lines",
                             ORGATED_DMA_IRQ_COUNT, &error_abort);
+
 }
 
 static void raspi_peripherals_base_init(Object *obj)
@@ -179,6 +180,11 @@ static void raspi_peripherals_base_init(Object *obj)
                             &s->orgated_i2c_irq, TYPE_OR_IRQ);
     object_property_set_int(OBJECT(&s->orgated_i2c_irq), "num-lines",
                             ORGATED_I2C_IRQ_COUNT, &error_abort);
+
+    /* SP804-alike ARM Timer */
+    object_initialize(&s->armtmr, sizeof(s->armtmr), TYPE_BCM283xSP804);
+    object_property_add_child(obj, "bcm283xsp804", OBJECT(&s->armtmr));
+    qdev_set_parent_bus(DEVICE(&s->armtmr), sysbus_get_default(), NULL);
 }
 
 static void bcm2835_peripherals_realize(DeviceState *dev, Error **errp)
@@ -244,6 +250,7 @@ static void bcm2835_peripherals_realize(DeviceState *dev, Error **errp)
         sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->gpio), 0));
 
     object_property_add_alias(OBJECT(s), "sd-bus", OBJECT(&s->gpio), "sd-bus");
+
 }
 
 void bcm_soc_peripherals_common_realize(DeviceState *dev, Error **errp)
@@ -509,8 +516,21 @@ void bcm_soc_peripherals_common_realize(DeviceState *dev, Error **errp)
                                                  BCM2835_IC_GPU_IRQ,
                                                  INTERRUPT_I2C));
 
+
+    /* SP804-alike ARM Timer */
+    object_property_set_bool(OBJECT(&s->armtmr), "realized", true, &err);
+    if (err) {
+        error_propagate(errp, err);
+        return;
+    }
+    memory_region_add_subregion(&s->peri_mr, ARMCTRL_TIMER0_1_OFFSET,
+                                sysbus_mmio_get_region(SYS_BUS_DEVICE(&s->armtmr), 0));
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->armtmr), 0,
+                       qdev_get_gpio_in_named(DEVICE(&s->ic), BCM2835_IC_ARM_IRQ,
+                                              INTERRUPT_ARM_TIMER));
+
     create_unimp(s, &s->txp, "bcm2835-txp", TXP_OFFSET, 0x1000);
-    create_unimp(s, &s->armtmr, "bcm2835-sp804", ARMCTRL_TIMER0_1_OFFSET, 0x40);
+//    create_unimp(s, &s->armtmr, "bcm2835-sp804", ARMCTRL_TIMER0_1_OFFSET, 0x40);
     create_unimp(s, &s->i2s, "bcm2835-i2s", I2S_OFFSET, 0x100);
     create_unimp(s, &s->smi, "bcm2835-smi", SMI_OFFSET, 0x100);
     create_unimp(s, &s->bscsl, "bcm2835-spis", BSC_SL_OFFSET, 0x100);
